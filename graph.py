@@ -163,20 +163,30 @@ def load_link(link_fn, graph):
         
 
 if __name__ == '__main__':
-    v_list = {}
-    v_list = load_vertex_E("./data/EINFOALL_ANON.csv", 'E', v_list)
-    #print len(v_list)
-    v_list = load_vertex_P("./data/PINFOALL_ANON.csv", 'P', v_list)
-    #print len(v_list)
-
+    v_list= {}
+    v_list = load_vertex_E("../data/EINFOALL_ANON.csv", 'E', v_list)
+    print len(v_list)
+    v_list = load_vertex_P("../data/PINFOALL_ANON.csv", 'P', v_list)
     graph = Graph(v_list)
-    graph = load_link("./data/LINK_ANON.csv", graph)
-    neighbors= graph.bfs('anon_S0E')
-   # print len(neighbors)
-   # for v in neighbors:
-   #     print "(" + v + ")" #+ str(neighbors[v]) + ") "
+    graph = load_link("../data/LINK_ANON.csv", graph)
+    f = open("temp", 'w')
+    count = 0
 
-    factors, prevs, jump_P, jump_E = graph.dijkstra('anon_S0E', neighbors)  
-    for v in factors:
-        if is_E(v):
-            print  v + "  " + str(factors[v]) + "  " +  str(jump_E[v])
+    for v_center in v_list:
+        count = count + 1
+        print count
+        if is_E(v_center) and v_list[v_center].creditscore != -1:
+            neighbors= graph.bfs(v_center)
+               # print len(neighbors)
+               # for v in neighbors:
+               #     print "(" + v + ")" #+ str(neighbors[v]) + ") "
+            factors, prevs, jump_P, jump_E = graph.dijkstra(v_center, neighbors)  
+            weight = 0
+            credit = 0
+            for v in factors:
+                if is_E(v) and jump_E[v]<=3 and v_list[v].creditscore!=-1:
+                    credit = credit + v_list[v].creditscore * factors[v]
+                    weight = weight + factors[v]
+            f.write(v_center+" "+str(v_list[v_center].creditscore)+" "+str(credit/weight))
+    f.close()
+
